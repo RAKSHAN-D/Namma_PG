@@ -32,4 +32,6 @@ public interface AdminService {
     com.nammapg.backend.payload.response.OwnerDetailDto getOwnerDetails(Long ownerId);
 
     com.nammapg.backend.payload.response.ApprovalStatsDto getApprovalStats();
+
+    com.nammapg.backend.payload.response.ReportDataDto getReportData();
 }

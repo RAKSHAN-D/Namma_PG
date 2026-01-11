@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import AdminService from "../../services/admin.service";
-import { ArrowLeft, CheckCircle, XCircle, MapPin, Building, User, Info, Utensils, Wifi, Edit } from "lucide-react";
+import { ArrowLeft, CheckCircle, XCircle, MapPin, Building, User, Info, Utensils, Wifi, ShieldBan, ShieldCheck } from "lucide-react";
 
 const ViewPG = () => {
     const { id } = useParams();
@@ -75,8 +75,16 @@ const ViewPG = () => {
                             </div>
                         </div>
                     </div>
-                    <button className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition flex items-center gap-2">
-                        <Edit size={16} /> Edit PG
+                    <button
+                        onClick={() => {
+                            const newStatus = !pg.active;
+                            AdminService.updatePgStatus(pg.id, newStatus).then(() => {
+                                setPg({ ...pg, active: newStatus });
+                            });
+                        }}
+                        className={`px-4 py-2 ${pg.active ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'} text-white rounded-lg shadow transition flex items-center gap-2`}
+                    >
+                        {pg.active ? <><ShieldBan size={16} /> Block PG</> : <><ShieldCheck size={16} /> Unblock PG</>}
                     </button>
                 </div>
 

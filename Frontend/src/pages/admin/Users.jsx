@@ -126,7 +126,7 @@ const Users = () => {
                                 <tr
                                     key={user.id}
                                     className="hover:bg-gray-50 transition-colors cursor-pointer"
-                                    onClick={() => navigate(`/ admin / users / ${user.id} `)}
+                                    onClick={() => navigate(`/admin/users/${user.id}`)}
                                 >
                                     <td className="px-6 py-4">
                                         <div className="flex items-center">
@@ -146,7 +146,7 @@ const Users = () => {
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <span className={`px - 3 py - 1 rounded - full text - xs font - medium border ${getRoleColor(getRoleDisplay(user))} `}>
+                                        <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getRoleColor(getRoleDisplay(user))}`}>
                                             {getRoleDisplay(user)}
                                         </span>
                                     </td>
@@ -154,10 +154,10 @@ const Users = () => {
                                         {formatDate(user.createdAt)}
                                     </td>
                                     <td className="px-6 py-4">
-                                        <span className={`px - 3 py - 1 rounded - full text - xs font - medium border ${user.active
-                                                ? "bg-green-100 text-green-700 border-green-200"
-                                                : "bg-red-100 text-red-600 border-red-200"
-                                            } `}>
+                                        <span className={`px-3 py-1 rounded-full text-xs font-medium border ${user.active
+                                            ? "bg-green-100 text-green-700 border-green-200"
+                                            : "bg-red-100 text-red-600 border-red-200"
+                                            }`}>
                                             {user.active ? "Active" : "Blocked"}
                                         </span>
                                     </td>

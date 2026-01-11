@@ -82,4 +82,9 @@ public class AdminController {
     public ResponseEntity<com.nammapg.backend.payload.response.ApprovalStatsDto> getApprovalStats() {
         return ResponseEntity.ok(adminService.getApprovalStats());
     }
+
+    @GetMapping("/reports")
+    public ResponseEntity<com.nammapg.backend.payload.response.ReportDataDto> getReportData() {
+        return ResponseEntity.ok(adminService.getReportData());
+    }
 }

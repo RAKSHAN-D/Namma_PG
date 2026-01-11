@@ -166,6 +166,10 @@ const AdminService = {
     getApprovalStats: async () => {
         const response = await api.get(`/admin/approvals/stats`);
         return response.data;
+    },
+    getReportData: async () => {
+        const response = await api.get(`/admin/reports`);
+        return response.data;
     }
 };
 

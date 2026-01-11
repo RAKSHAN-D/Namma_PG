@@ -86,7 +86,7 @@ const AdminDashboard = () => {
                         <p className="text-sm font-medium text-gray-500 group-hover:text-indigo-600 transition-colors">Total PGs</p>
                         <h3 className="text-3xl font-bold text-indigo-900 mt-1">{stats.totalPGs}</h3>
                         <p className="text-xs text-green-600 font-medium mt-1 flex items-center">
-                            <TrendingUp size={12} className="mr-1" /> +12% this month
+                            <TrendingUp size={12} className="mr-1" />
                         </p>
                     </div>
                     <div className="p-3 bg-indigo-50 rounded-lg text-indigo-600 group-hover:bg-indigo-100 transition-colors">
@@ -103,7 +103,7 @@ const AdminDashboard = () => {
                         <p className="text-sm font-medium text-gray-500 group-hover:text-purple-600 transition-colors">Active Owners</p>
                         <h3 className="text-3xl font-bold text-purple-900 mt-1">{stats.activeOwners}</h3>
                         <p className="text-xs text-green-600 font-medium mt-1 flex items-center">
-                            <UserPlus size={12} className="mr-1" /> +2 new today
+                            <UserPlus size={12} className="mr-1" />
                         </p>
                     </div>
                     <div className="p-3 bg-purple-50 rounded-lg text-purple-600 group-hover:bg-purple-100 transition-colors">

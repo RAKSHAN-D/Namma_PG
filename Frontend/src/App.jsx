@@ -15,6 +15,7 @@ import ViewPG from "./pages/admin/ViewPG";
 import ViewUser from "./pages/admin/ViewUser";
 import ViewOwner from "./pages/admin/ViewOwner";
 import Approvals from "./pages/admin/Approvals";
+import Reports from "./pages/admin/Reports";
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
           <Route index element={<Navigate to="dashboard" />} />
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="approvals" element={<Approvals />} />
+          <Route path="reports" element={<Reports />} />
           <Route path="pgs" element={<AllPGs />} />
           <Route path="pgs/:id" element={<ViewPG />} />
           <Route path="owners" element={<Owners />} />

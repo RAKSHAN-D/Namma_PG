@@ -359,4 +359,50 @@ public class AdminServiceImpl implements AdminService {
         return new ApprovalStatsDto(approvedPgs, pendingPgs, approvedUsers, pendingUsers, approvedOwners,
                 pendingOwners);
     }
+
+    @Override
+    public ReportDataDto getReportData() {
+        ReportDataDto report = new ReportDataDto();
+
+        // 1. User Growth Report (simplified - counts by role)
+        List<User> allUsers = userRepository.findByRoles_Name("ROLE_PG_USER");
+        List<User> allOwners = userRepository.findByRoles_Name("ROLE_PG_OWNER");
+
+        ReportDataDto.UserGrowthReport userGrowth = new ReportDataDto.UserGrowthReport();
+        userGrowth.setTotalUsers(allUsers.size());
+        userGrowth.setTotalOwners(allOwners.size());
+        // For MVP, we'll return aggregate. Time-series would require created_at
+        // grouping
+        report.setUserGrowth(userGrowth);
+
+        // 2. PG Status Report
+        long approvedPgs = pgRepository.countByActiveTrue();
+        long totalPgs = pgRepository.count();
+        long pendingPgs = totalPgs - approvedPgs;
+        ReportDataDto.PgStatusReport pgStatus = new ReportDataDto.PgStatusReport(approvedPgs, pendingPgs, totalPgs);
+        report.setPgStatus(pgStatus);
+
+        // 3. Issue Analytics Report
+        long openIssues = issueRepository.findAll().stream().filter(i -> "OPEN".equals(i.getStatus())).count();
+        long inProgressIssues = issueRepository.findAll().stream().filter(i -> "IN_PROGRESS".equals(i.getStatus()))
+                .count();
+        long resolvedIssues = issueRepository.findAll().stream()
+                .filter(i -> "RESOLVED".equals(i.getStatus()) || "CLOSED".equals(i.getStatus())).count();
+        long totalIssues = issueRepository.count();
+        ReportDataDto.IssueAnalyticsReport issueAnalytics = new ReportDataDto.IssueAnalyticsReport(openIssues,
+                inProgressIssues, resolvedIssues, totalIssues);
+        report.setIssueAnalytics(issueAnalytics);
+
+        // 4. Location Distribution
+        List<ReportDataDto.LocationDistribution> locationDist = new java.util.ArrayList<>();
+        java.util.Map<String, Long> cityGroups = pgRepository.findAll().stream()
+                .collect(java.util.stream.Collectors.groupingBy(
+                        pg -> pg.getArea() + ", " + pg.getCity(),
+                        java.util.stream.Collectors.counting()));
+        cityGroups.forEach(
+                (location, count) -> locationDist.add(new ReportDataDto.LocationDistribution(location, count)));
+        report.setLocationDistribution(locationDist);
+
+        return report;
+    }
 }
