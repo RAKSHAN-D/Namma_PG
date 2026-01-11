@@ -1,5 +1,6 @@
 package com.nammapg.backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
@@ -11,29 +12,37 @@ public class Issue {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /* =====================
-       RELATIONSHIPS
-       ===================== */
+    /*
+     * =====================
+     * RELATIONSHIPS
+     * =====================
+     */
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler", "roles", "password" })
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "pg_id", nullable = false)
+    @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler", "owner", "food", "facilities", "rooms" })
     private Pg pg;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "room_id")
+    @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
     private Rooms room; // optional
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "booking_id")
+    @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
     private Booking booking; // optional but powerful
 
-    /* =====================
-       ISSUE DETAILS
-       ===================== */
+    /*
+     * =====================
+     * ISSUE DETAILS
+     * =====================
+     */
 
     @Column(nullable = false)
     private String issueType;
@@ -45,9 +54,11 @@ public class Issue {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    /* =====================
-       STATUS & PRIORITY
-       ===================== */
+    /*
+     * =====================
+     * STATUS & PRIORITY
+     * =====================
+     */
 
     @Column(nullable = false)
     private String status;
@@ -56,25 +67,31 @@ public class Issue {
     private String priority;
     // LOW, MEDIUM, HIGH
 
-    /* =====================
-       ASSIGNMENT
-       ===================== */
+    /*
+     * =====================
+     * ASSIGNMENT
+     * =====================
+     */
 
     private String assignedTo;
     // admin / owner / volunteer (future mapping)
 
-    /* =====================
-       RESOLUTION
-       ===================== */
+    /*
+     * =====================
+     * RESOLUTION
+     * =====================
+     */
 
     @Column(columnDefinition = "TEXT")
     private String resolutionNotes;
 
     private Boolean userSatisfied;
 
-    /* =====================
-       TIMESTAMPS
-       ===================== */
+    /*
+     * =====================
+     * TIMESTAMPS
+     * =====================
+     */
 
     private LocalDateTime reportedAt;
 
@@ -82,9 +99,11 @@ public class Issue {
 
     private LocalDateTime closedAt;
 
-    /* =====================
-       AUDIT
-       ===================== */
+    /*
+     * =====================
+     * AUDIT
+     * =====================
+     */
 
     private boolean active = true;
 

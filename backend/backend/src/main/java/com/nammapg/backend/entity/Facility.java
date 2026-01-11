@@ -1,12 +1,12 @@
 package com.nammapg.backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.util.Set;
 
 @Entity
 @Table(name = "facilities")
 public class Facility {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -20,6 +20,7 @@ public class Facility {
 
     // Inverse side of PG–Facility relationship
     @ManyToMany(mappedBy = "facilities")
+    @JsonIgnore
     private Set<Pg> pgs;
 
     public Facility() {

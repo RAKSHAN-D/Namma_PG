@@ -11,6 +11,10 @@ import AllPGs from "./pages/admin/AllPGs";
 import Owners from "./pages/admin/Owners";
 import UsersPage from "./pages/admin/Users";
 import Issues from "./pages/admin/Issues";
+import ViewPG from "./pages/admin/ViewPG";
+import ViewUser from "./pages/admin/ViewUser";
+import ViewOwner from "./pages/admin/ViewOwner";
+import Approvals from "./pages/admin/Approvals";
 
 function App() {
   return (
@@ -27,9 +31,13 @@ function App() {
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<Navigate to="dashboard" />} />
           <Route path="dashboard" element={<AdminDashboard />} />
+          <Route path="approvals" element={<Approvals />} />
           <Route path="pgs" element={<AllPGs />} />
+          <Route path="pgs/:id" element={<ViewPG />} />
           <Route path="owners" element={<Owners />} />
+          <Route path="owners/:id" element={<ViewOwner />} />
           <Route path="users" element={<UsersPage />} />
+          <Route path="users/:id" element={<ViewUser />} />
           <Route path="issues" element={<Issues />} />
         </Route>
       </Routes>

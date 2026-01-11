@@ -1,81 +1,85 @@
 package com.nammapg.backend.controller;
 
 import com.nammapg.backend.entity.Issue;
-import com.nammapg.backend.entity.Pg;
 import com.nammapg.backend.entity.User;
 import com.nammapg.backend.payload.response.DashboardStatsDto;
-import com.nammapg.backend.repository.IssueRepository;
-import com.nammapg.backend.repository.PgRepository;
-import com.nammapg.backend.repository.UserRepository;
+import com.nammapg.backend.payload.response.PgDetailDto;
+import com.nammapg.backend.payload.response.PgResponseDto;
+import com.nammapg.backend.service.AdminService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
 
+@CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/admin")
 @PreAuthorize("hasRole('ADMIN')")
 public class AdminController {
 
     @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private PgRepository pgRepository;
-
-    @Autowired
-    private IssueRepository issueRepository;
+    private AdminService adminService;
 
     @GetMapping("/stats")
     public ResponseEntity<DashboardStatsDto> getDashboardStats() {
-        long totalPGs = pgRepository.count();
-
-        List<User> allUsers = userRepository.findAll();
-
-        long activeOwners = allUsers.stream()
-                .filter(u -> u.getRoles().stream().anyMatch(r -> r.getName().equals("ROLE_PG_OWNER")))
-                .count();
-
-        long activeUsers = allUsers.stream()
-                .filter(u -> u.getRoles().stream().anyMatch(r -> r.getName().equals("ROLE_PG_USER")))
-                .count();
-
-        // Assuming inactive/false PGs are "Pending" for now
-        long pendingApprovals = pgRepository.findAll().stream()
-                .filter(pg -> !pg.isActive())
-                .count();
-
-        return ResponseEntity.ok(new DashboardStatsDto(totalPGs, activeOwners, activeUsers, pendingApprovals));
+        return ResponseEntity.ok(adminService.getDashboardStats());
     }
 
     @GetMapping("/pgs")
-    public ResponseEntity<List<Pg>> getAllPgs() {
-        return ResponseEntity.ok(pgRepository.findAll());
+    public ResponseEntity<List<PgResponseDto>> getAllPgs() {
+        return ResponseEntity.ok(adminService.getAllPgs());
+    }
+
+    @GetMapping("/pgs/{id}")
+    public ResponseEntity<PgDetailDto> getPgDetails(@PathVariable Long id) {
+        return ResponseEntity.ok(adminService.getPgDetails(id));
+    }
+
+    @PutMapping("/pgs/{id}/status")
+    public ResponseEntity<PgResponseDto> updatePgStatus(@PathVariable Long id, @RequestParam boolean active) {
+        return ResponseEntity.ok(adminService.updatePgStatus(id, active));
     }
 
     @GetMapping("/users")
     public ResponseEntity<List<User>> getAllUsers() {
-        List<User> users = userRepository.findAll().stream()
-                .filter(u -> u.getRoles().stream().anyMatch(r -> r.getName().equals("ROLE_PG_USER")))
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(users);
+        return ResponseEntity.ok(adminService.getAllUsers());
     }
 
     @GetMapping("/owners")
     public ResponseEntity<List<User>> getAllOwners() {
-        List<User> owners = userRepository.findAll().stream()
-                .filter(u -> u.getRoles().stream().anyMatch(r -> r.getName().equals("ROLE_PG_OWNER")))
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(owners);
+        return ResponseEntity.ok(adminService.getAllOwners());
+    }
+
+    @GetMapping("/onboarding-trend")
+    public ResponseEntity<List<Map<String, Object>>> getOnboardingTrend() {
+        return ResponseEntity.ok(adminService.getOnboardingTrend());
     }
 
     @GetMapping("/issues")
     public ResponseEntity<List<Issue>> getAllIssues() {
-        return ResponseEntity.ok(issueRepository.findAll());
+        return ResponseEntity.ok(adminService.getAllIssues());
+    }
+
+    @PutMapping("/users/{id}/status")
+    public ResponseEntity<User> updateUserStatus(@PathVariable Long id, @RequestParam boolean active) {
+        return ResponseEntity.ok(adminService.updateUserStatus(id, active));
+    }
+
+    @GetMapping("/users/{id}")
+    public ResponseEntity<com.nammapg.backend.payload.response.UserDetailDto> getUserDetails(@PathVariable Long id) {
+        return ResponseEntity.ok(adminService.getUserDetails(id));
+    }
+
+    @GetMapping("/owners/{id}")
+    public ResponseEntity<com.nammapg.backend.payload.response.OwnerDetailDto> getOwnerDetails(@PathVariable Long id) {
+        return ResponseEntity.ok(adminService.getOwnerDetails(id));
+    }
+
+    @GetMapping("/approvals/stats")
+    public ResponseEntity<com.nammapg.backend.payload.response.ApprovalStatsDto> getApprovalStats() {
+        return ResponseEntity.ok(adminService.getApprovalStats());
     }
 }

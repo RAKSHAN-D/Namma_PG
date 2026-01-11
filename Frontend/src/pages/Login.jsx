@@ -23,7 +23,7 @@ const Login = () => {
             } else if (user.roles.includes("ROLE_PG_USER")) {
                 navigate("/user-dashboard");
             } else if (user.roles.includes("ROLE_ADMIN")) {
-                navigate("/owner-dashboard"); // Admin gets owner view for now
+                navigate("/admin/dashboard");
             } else {
                 navigate("/home");
             }

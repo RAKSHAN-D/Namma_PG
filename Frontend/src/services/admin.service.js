@@ -1,22 +1,10 @@
-import axios from "axios";
-
-const API_URL = "http://localhost:8080/api/admin/";
-
-// Helper to get JWT Token
-const authHeader = () => {
-    const user = JSON.parse(localStorage.getItem("user"));
-    if (user && user.accessToken) {
-        return { Authorization: "Bearer " + user.accessToken };
-    } else {
-        return {};
-    }
-};
+import api from "./api";
 
 // --- API METHODS ---
 
 const getDashboardStats = async () => {
     try {
-        const response = await axios.get(API_URL + "stats", { headers: authHeader() });
+        const response = await api.get("/admin/stats");
         return response.data;
     } catch (error) {
         console.error("Failed to fetch stats", error);
@@ -25,17 +13,49 @@ const getDashboardStats = async () => {
 };
 
 const getAllPGs = async () => {
-    const response = await axios.get(API_URL + "pgs", { headers: authHeader() });
+    const response = await api.get("/admin/pgs");
+    return response.data;
+};
+
+const getPgDetails = async (id) => {
+    const response = await api.get(`/admin/pgs/${id}`);
     return response.data;
 };
 
 const getAllUsers = async () => {
-    const response = await axios.get(API_URL + "users", { headers: authHeader() });
+    const response = await api.get("/admin/users");
     return response.data;
 };
 
 const getAllOwners = async () => {
-    const response = await axios.get(API_URL + "owners", { headers: authHeader() });
+    const response = await api.get("/admin/owners");
+    return response.data;
+};
+
+const getAllIssues = async () => {
+    const response = await api.get("/admin/issues");
+    return response.data;
+};
+
+const updatePgStatus = async (id, active) => {
+    const response = await api.put(
+        `/admin/pgs/${id}/status`,
+        null,
+        {
+            params: { active }
+        }
+    );
+    return response.data;
+};
+
+const updateUserStatus = async (id, active) => {
+    const response = await api.put(
+        `/admin/users/${id}/status`,
+        null,
+        {
+            params: { active }
+        }
+    );
     return response.data;
 };
 
@@ -72,30 +92,33 @@ const getUserSignupTrend = async () => {
 };
 
 const getOnboardingTrend = async () => {
-    // Returning mock trend
-    return [
-        { month: "Jan", users: 10, owners: 2 },
-        { month: "Feb", users: 25, owners: 4 },
-        { month: "Mar", users: 45, owners: 5 },
-        { month: "Apr", users: 70, owners: 8 },
-        { month: "May", users: 110, owners: 15 },
-        { month: "Jun", users: 168, owners: 34 },
-    ];
+    try {
+        const response = await api.get("/admin/onboarding-trend");
+        return response.data;
+    } catch (e) {
+        // Fallback or empty if error
+        return [];
+    }
 };
 
 const getPgStatusDistribution = async () => {
     try {
         const pgs = await getAllPGs();
-        const approved = pgs.filter(pg => pg.active).length;
-        const pending = pgs.filter(pg => !pg.active).length;
+        // Fallback if pgs is not an array
+        const pgList = Array.isArray(pgs) ? pgs : [];
+
+        const approved = pgList.filter(pg => pg.active === true).length;
+        const pending = pgList.filter(pg => pg.active === false).length;
         const blocked = 0; // Logic for blocked to be added later
 
+        // Ensure we always return at least some data structure even if values are 0
         return [
             { name: "Approved", value: approved, color: "#10B981" },
             { name: "Pending", value: pending, color: "#F59E0B" },
             { name: "Blocked", value: blocked, color: "#EF4444" },
         ];
     } catch (e) {
+        console.error("Error fetching PG status distribution:", e);
         return [
             { name: "Approved", value: 0, color: "#10B981" },
             { name: "Pending", value: 0, color: "#F59E0B" },
@@ -127,7 +150,23 @@ const AdminService = {
     getAccountStatusOverview,
     getAllPGs,
     getAllUsers,
-    getAllOwners
+    getAllOwners,
+    getAllIssues,
+    updatePgStatus,
+    updateUserStatus,
+    getPgDetails,
+    getUserDetails: async (id) => {
+        const response = await api.get(`/admin/users/${id}`);
+        return response.data;
+    },
+    getOwnerDetails: async (id) => {
+        const response = await api.get(`/admin/owners/${id}`);
+        return response.data;
+    },
+    getApprovalStats: async () => {
+        const response = await api.get(`/admin/approvals/stats`);
+        return response.data;
+    }
 };
 
 export default AdminService;

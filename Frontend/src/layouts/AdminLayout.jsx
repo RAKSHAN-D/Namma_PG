@@ -40,7 +40,7 @@ const AdminLayout = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-100 flex">
+        <div className="h-screen bg-gray-100 flex overflow-hidden">
             {/* Sidebar */}
             <aside
                 className={`fixed inset-y-0 left-0 z-50 bg-indigo-900 text-white transition-all duration-300 ease-in-out ${isSidebarOpen ? "w-64" : "w-20"

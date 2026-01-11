@@ -1,71 +1,31 @@
-package com.nammapg.backend.entity;
+package com.nammapg.backend.payload.response;
 
-import jakarta.persistence.*;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 
-@Entity
-@Table(name = "food")
-public class Food {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class FoodDto {
     private Long id;
-
-    // VEG / NON_VEG / BOTH
-    @Column(nullable = false)
-    private String foodType;
-
+    //private String foodType;
     private boolean eggsProvided;
-
-    // Breakfast
     private boolean breakfast;
     private LocalTime breakfastStartTime;
     private LocalTime breakfastEndTime;
-
-    // Lunch
     private boolean lunch;
     private LocalTime lunchStartTime;
     private LocalTime lunchEndTime;
-
-    // Dinner
     private boolean dinner;
     private LocalTime dinnerStartTime;
     private LocalTime dinnerEndTime;
-
-    // Sunday special
     private boolean sundaySpecial;
     private String sundaySpecialItem;
-
-    // Weekly sweet
     private boolean weeklySweetProvided;
     private String weeklySweetDay;
     private String weeklySweetItem;
-
-    // Weekly kitchen closure
     private boolean weeklyKitchenClosed;
     private String kitchenClosedDay;
-
-    // Pricing info
     private boolean includedInRent;
-
-    // Optional notes
     private String remarks;
 
-    private boolean active = true;
-
-    // PG mapping (OWNING SIDE)
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "pg_id", nullable = false, unique = true)
-    @JsonIgnore
-    private Pg pg;
-
-    // Audit
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
-
-    public Food() {
+    public FoodDto() {
     }
 
     public Long getId() {
@@ -76,14 +36,13 @@ public class Food {
         this.id = id;
     }
 
-    public String getFoodType() {
-    return foodType;
-}
-
-
-    public void setFoodType(String foodType) {
-        this.foodType = foodType;
+   public String getFoodType() {
+        // MVP rule: all PGs support both
+        return "Veg & Non-Veg";
     }
+
+
+   
 
     public boolean isEggsProvided() {
         return eggsProvided;
@@ -235,37 +194,5 @@ public class Food {
 
     public void setRemarks(String remarks) {
         this.remarks = remarks;
-    }
-
-    public boolean isActive() {
-        return active;
-    }
-
-    public void setActive(boolean active) {
-        this.active = active;
-    }
-
-    public Pg getPg() {
-        return pg;
-    }
-
-    public void setPg(Pg pg) {
-        this.pg = pg;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
     }
 }

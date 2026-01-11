@@ -1,8 +1,11 @@
 package com.nammapg.backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import java.util.Set;
+
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "pgs")
@@ -12,7 +15,12 @@ public class Pg {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // PG basic identity
+    /*
+     * =========================
+     * BASIC PG DETAILS
+     * =========================
+     */
+
     @Column(nullable = false)
     private String name;
 
@@ -23,46 +31,109 @@ public class Pg {
     @Column(nullable = false)
     private String gender;
 
-    // Building information
-    private int totalFloors;
-
-    private int totalRooms;
-
-    // Rating (avg, derived later from reviews)
-    private double rating;
-
-    // Location (Phase 1: simple)
     @Column(nullable = false)
     private String area;
 
     @Column(nullable = false)
     private String city;
 
+    /*
+     * =========================
+     * BUILDING DETAILS
+     * =========================
+     */
+
+    private int totalFloors;
+
+    private int totalRooms;
+
+    /*
+     * =========================
+     * STATUS & RATING
+     * =========================
+     */
+
+    // Average rating (derived later from reviews)
+    private double rating = 0.0;
+
     // Soft delete / enable-disable
+    @Column(nullable = false)
     private boolean active = true;
 
-    // PG Owner (User)
-    @ManyToOne(fetch = FetchType.LAZY)
+    /*
+     * =========================
+     * OWNER MAPPING
+     * =========================
+     */
+
+    // One PG → One Owner
+    // One Owner → Many PGs
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "owner_id", nullable = false)
     private User owner;
 
-    // Audit fields
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    /*
+     * =========================
+     * FACILITIES
+     * =========================
+     */
 
-    @ManyToMany
-    @JoinTable(
-            name = "pg_facilities",
-            joinColumns = @JoinColumn(name = "pg_id"),
-            inverseJoinColumns = @JoinColumn(name = "facility_id")
-    )
-    private Set<Facility> facilities;
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "pg_facilities", joinColumns = @JoinColumn(name = "pg_id"), inverseJoinColumns = @JoinColumn(name = "facility_id"))
+    private Set<Facility> facilities = new HashSet<>();
+
+    /*
+     * =========================
+     * FOOD (ONE-TO-ONE)
+     * =========================
+     */
 
     @OneToOne(mappedBy = "pg", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore // Prevent infinite recursion
     private Food food;
+
+    /*
+     * =========================
+     * AUDIT FIELDS
+     * =========================
+     */
+
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    private LocalDateTime updatedAt;
+
+    /*
+     * =========================
+     * LIFECYCLE CALLBACKS
+     * =========================
+     */
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = this.createdAt;
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    /*
+     * =========================
+     * CONSTRUCTORS
+     * =========================
+     */
 
     public Pg() {
     }
+
+    /*
+     * =========================
+     * GETTERS & SETTERS
+     * =========================
+     */
 
     public Long getId() {
         return id;
@@ -152,22 +223,6 @@ public class Pg {
         this.owner = owner;
     }
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
     public Set<Facility> getFacilities() {
         return facilities;
     }
@@ -182,5 +237,24 @@ public class Pg {
 
     public void setFood(Food food) {
         this.food = food;
+        if (food != null) {
+            food.setPg(this);
+        }
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
 }
