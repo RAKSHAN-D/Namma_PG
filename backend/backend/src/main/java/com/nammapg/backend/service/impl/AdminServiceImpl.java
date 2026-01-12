@@ -4,6 +4,7 @@ import com.nammapg.backend.entity.Booking;
 import com.nammapg.backend.entity.Food;
 import com.nammapg.backend.entity.Issue;
 import com.nammapg.backend.entity.Pg;
+import com.nammapg.backend.entity.PlatformSettings;
 import com.nammapg.backend.entity.User;
 import com.nammapg.backend.payload.response.*;
 import com.nammapg.backend.repository.BookingRepository;
@@ -31,6 +32,9 @@ public class AdminServiceImpl implements AdminService {
 
     @Autowired
     private BookingRepository bookingRepository;
+
+    @Autowired
+    private com.nammapg.backend.repository.PlatformSettingsRepository platformSettingsRepository;
 
     @Override
     public DashboardStatsDto getDashboardStats() {
@@ -404,5 +408,68 @@ public class AdminServiceImpl implements AdminService {
         report.setLocationDistribution(locationDist);
 
         return report;
+    }
+
+    @Override
+    public PlatformSettings getSettings() {
+        // Always return the first settings record, create if doesn't exist
+        return platformSettingsRepository.findFirstByOrderById().orElseGet(() -> {
+            PlatformSettings defaultSettings = new PlatformSettings();
+            defaultSettings.setPlatformName("Namma PG");
+            defaultSettings.setPlatformEmail("admin@namma.com");
+            defaultSettings.setSupportEmail("support@namma.com");
+            defaultSettings.setPlatformPhone("+91-1234567890");
+            defaultSettings.setAutoApprovePgs(false);
+            defaultSettings.setAutoApproveOwners(false);
+            defaultSettings.setAutoApproveUsers(true);
+            defaultSettings.setNotifyNewPg(true);
+            defaultSettings.setNotifyNewOwner(true);
+            defaultSettings.setNotifyHighPriorityIssue(true);
+            defaultSettings.setNotifyDailySummary(false);
+            defaultSettings.setMaintenanceMode(false);
+            defaultSettings.setMaintenanceMessage("We are currently under maintenance. Please check back later.");
+            defaultSettings.setUpdatedAt(java.time.LocalDateTime.now());
+            return platformSettingsRepository.save(defaultSettings);
+        });
+    }
+
+    @Override
+    public PlatformSettings updateSettings(PlatformSettings settings) {
+        PlatformSettings existingSettings = getSettings();
+
+        // Update fields
+        if (settings.getPlatformName() != null)
+            existingSettings.setPlatformName(settings.getPlatformName());
+        if (settings.getPlatformEmail() != null)
+            existingSettings.setPlatformEmail(settings.getPlatformEmail());
+        if (settings.getPlatformPhone() != null)
+            existingSettings.setPlatformPhone(settings.getPlatformPhone());
+        if (settings.getSupportEmail() != null)
+            existingSettings.setSupportEmail(settings.getSupportEmail());
+
+        if (settings.getAutoApprovePgs() != null)
+            existingSettings.setAutoApprovePgs(settings.getAutoApprovePgs());
+        if (settings.getAutoApproveOwners() != null)
+            existingSettings.setAutoApproveOwners(settings.getAutoApproveOwners());
+        if (settings.getAutoApproveUsers() != null)
+            existingSettings.setAutoApproveUsers(settings.getAutoApproveUsers());
+
+        if (settings.getNotifyNewPg() != null)
+            existingSettings.setNotifyNewPg(settings.getNotifyNewPg());
+        if (settings.getNotifyNewOwner() != null)
+            existingSettings.setNotifyNewOwner(settings.getNotifyNewOwner());
+        if (settings.getNotifyHighPriorityIssue() != null)
+            existingSettings.setNotifyHighPriorityIssue(settings.getNotifyHighPriorityIssue());
+        if (settings.getNotifyDailySummary() != null)
+            existingSettings.setNotifyDailySummary(settings.getNotifyDailySummary());
+
+        if (settings.getMaintenanceMode() != null)
+            existingSettings.setMaintenanceMode(settings.getMaintenanceMode());
+        if (settings.getMaintenanceMessage() != null)
+            existingSettings.setMaintenanceMessage(settings.getMaintenanceMessage());
+
+        existingSettings.setUpdatedAt(java.time.LocalDateTime.now());
+
+        return platformSettingsRepository.save(existingSettings);
     }
 }

@@ -3,34 +3,26 @@ import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
     LayoutDashboard,
     Building2,
-    Users,
-    UserCheck,
-    ClipboardCheck,
-    FileBarChart,
+    BarChart3,
     Settings,
     LogOut,
     Menu,
     X,
     Bell,
-    User,
-    AlertCircle
+    Plus
 } from "lucide-react";
 import AuthService from "../services/auth.service";
 
-const AdminLayout = () => {
+const OwnerLayout = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const location = useLocation();
     const navigate = useNavigate();
 
     const menuItems = [
-        { path: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
-        { path: "/admin/pgs", label: "All PGs", icon: Building2 },
-        { path: "/admin/owners", label: "Owners", icon: UserCheck },
-        { path: "/admin/users", label: "Users", icon: Users },
-        { path: "/admin/approvals", label: "Approvals", icon: ClipboardCheck },
-        { path: "/admin/issues", label: "Issues", icon: AlertCircle },
-        { path: "/admin/reports", label: "Reports", icon: FileBarChart },
-        { path: "/admin/settings", label: "Settings", icon: Settings },
+        { path: "/owner/dashboard", label: "Dashboard", icon: LayoutDashboard },
+        { path: "/owner/pgs", label: "My PGs", icon: Building2 },
+        { path: "/owner/analytics", label: "Analytics", icon: BarChart3 },
+        { path: "/owner/settings", label: "Settings", icon: Settings },
     ];
 
     const handleLogout = () => {
@@ -48,9 +40,9 @@ const AdminLayout = () => {
                 {/* Logo Area */}
                 <div className="h-16 flex items-center justify-center border-b border-indigo-800">
                     <h1 className={`font-bold text-xl transition-all ${isSidebarOpen ? "block" : "hidden"}`}>
-                        Namma PG <span className="text-indigo-400">Admin</span>
+                        Namma PG <span className="text-indigo-400">Owner</span>
                     </h1>
-                    <span className={`font-bold text-xl ${!isSidebarOpen ? "block" : "hidden"}`}>NP</span>
+                    <span className={`font-bold text-xl ${!isSidebarOpen ? "block" : "hidden"}`}>NO</span>
                 </div>
 
                 {/* Menu Items */}
@@ -68,13 +60,26 @@ const AdminLayout = () => {
                                     }`}
                             >
                                 <Icon className="h-5 w-5 min-w-[1.25rem]" />
-                                <span className={`ml-4 font-medium transition-all ${isSidebarOpen ? "block" : "hidden"}`}>
+                                <span className={`ml-3 ${isSidebarOpen ? "block" : "hidden"}`}>
                                     {item.label}
                                 </span>
                             </Link>
                         );
                     })}
                 </nav>
+
+                {/* Add PG Button */}
+                <div className="absolute bottom-20 left-0 right-0 px-4">
+                    <Link
+                        to="/owner/pgs/add"
+                        className="flex items-center justify-center px-4 py-3 bg-green-600 hover:bg-green-700 rounded-xl transition-colors shadow-lg"
+                    >
+                        <Plus className="h-5 w-5" />
+                        <span className={`ml-2 ${isSidebarOpen ? "block" : "hidden"}`}>
+                            Add New PG
+                        </span>
+                    </Link>
+                </div>
 
                 {/* Toggle Sidebar Button (Mobile) */}
                 <button
@@ -99,6 +104,7 @@ const AdminLayout = () => {
                     </div>
 
                     <div className="flex items-center space-x-4">
+                        {/* Notifications */}
                         <button className="p-2 text-gray-400 hover:text-gray-600 relative">
                             <Bell size={20} />
                             <span className="absolute top-1.5 right-1.5 h-2 w-2 bg-red-500 rounded-full border border-white"></span>
@@ -106,7 +112,7 @@ const AdminLayout = () => {
 
                         <div className="flex items-center space-x-3 pl-4 border-l border-gray-200">
                             <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold border border-indigo-200">
-                                A
+                                O
                             </div>
                             <button
                                 onClick={handleLogout}
@@ -127,4 +133,4 @@ const AdminLayout = () => {
     );
 };
 
-export default AdminLayout;
+export default OwnerLayout;

@@ -34,4 +34,8 @@ public interface AdminService {
     com.nammapg.backend.payload.response.ApprovalStatsDto getApprovalStats();
 
     com.nammapg.backend.payload.response.ReportDataDto getReportData();
+
+    com.nammapg.backend.entity.PlatformSettings getSettings();
+
+    com.nammapg.backend.entity.PlatformSettings updateSettings(com.nammapg.backend.entity.PlatformSettings settings);
 }

@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
     Building,
     Users,
     UserCheck,
     AlertCircle,
     TrendingUp,
-    UserPlus
+    UserPlus,
+    Search
 } from "lucide-react";
 import {
     LineChart,
@@ -28,12 +29,19 @@ import {
 import AdminService from "../../services/admin.service";
 
 const AdminDashboard = () => {
+    const navigate = useNavigate();
     const [stats, setStats] = useState({ totalPGs: 0, activeOwners: 0, activeUsers: 0, pendingApprovals: 0 });
     const [pgGrowthData, setPgGrowthData] = useState([]);
     const [userSignupData, setUserSignupData] = useState([]);
     const [onboardingData, setOnboardingData] = useState([]);
     const [pgStatusData, setPgStatusData] = useState([]);
     const [loading, setLoading] = useState(true);
+
+    // Search state
+    const [searchQuery, setSearchQuery] = useState("");
+    const [searchResults, setSearchResults] = useState({ pgs: [], users: [], owners: [] });
+    const [showResults, setShowResults] = useState(false);
+    const [searching, setSearching] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -67,13 +75,177 @@ const AdminDashboard = () => {
         fetchData();
     }, []);
 
+    // Search functionality
+    useEffect(() => {
+        if (searchQuery.trim().length === 0) {
+            setSearchResults({ pgs: [], users: [], owners: [] });
+            setShowResults(false);
+            return;
+        }
+
+        const performSearch = async () => {
+            setSearching(true);
+            try {
+                const [allPgs, allUsers, allOwners] = await Promise.all([
+                    AdminService.getAllPGs(),
+                    AdminService.getAllUsers(),
+                    AdminService.getAllOwners()
+                ]);
+
+                const query = searchQuery.toLowerCase();
+
+                const filteredPgs = allPgs.filter(pg =>
+                    pg.name.toLowerCase().includes(query) ||
+                    pg.city.toLowerCase().includes(query) ||
+                    pg.area.toLowerCase().includes(query)
+                ).slice(0, 5);
+
+                const filteredUsers = allUsers.filter(user =>
+                    (user.fullName && user.fullName.toLowerCase().includes(query)) ||
+                    (user.username && user.username.toLowerCase().includes(query)) ||
+                    (user.email && user.email.toLowerCase().includes(query))
+                ).slice(0, 5);
+
+                const filteredOwners = allOwners.filter(owner =>
+                    (owner.fullName && owner.fullName.toLowerCase().includes(query)) ||
+                    (owner.email && owner.email.toLowerCase().includes(query))
+                ).slice(0, 5);
+
+                setSearchResults({
+                    pgs: filteredPgs,
+                    users: filteredUsers,
+                    owners: filteredOwners
+                });
+                setShowResults(true);
+            } catch (error) {
+                console.error("Error searching:", error);
+            } finally {
+                setSearching(false);
+            }
+        };
+
+        const debounceTimer = setTimeout(performSearch, 300);
+        return () => clearTimeout(debounceTimer);
+    }, [searchQuery]);
+
     if (loading) {
         return <div className="text-center py-20 text-gray-500">Loading Dashboard...</div>;
     }
 
+    const totalResults = searchResults.pgs.length + searchResults.users.length + searchResults.owners.length;
+
     return (
         <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-gray-800">Dashboard Overview</h2>
+            <div className="flex items-center justify-between">
+                <h2 className="text-2xl font-bold text-gray-800">Dashboard Overview</h2>
+
+                {/* Global Search Bar */}
+                <div className="relative w-96">
+                    <div className="relative">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                        <input
+                            type="text"
+                            placeholder="Search PGs, Users, or Owners..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            onFocus={() => setShowResults(searchQuery.length > 0)}
+                            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        />
+                    </div>
+
+                    {/* Search Results Dropdown */}
+                    {showResults && totalResults > 0 && (
+                        <div className="absolute top-full mt-2 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-96 overflow-y-auto z-50">
+                            {searchResults.pgs.length > 0 && (
+                                <div className="p-3 border-b border-gray-100">
+                                    <div className="text-xs font-semibold text-gray-500 uppercase mb-2">PGs ({searchResults.pgs.length})</div>
+                                    {searchResults.pgs.map(pg => (
+                                        <div
+                                            key={pg.id}
+                                            onClick={() => {
+                                                navigate(`/admin/pgs/${pg.id}`);
+                                                setShowResults(false);
+                                                setSearchQuery("");
+                                            }}
+                                            className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded cursor-pointer"
+                                        >
+                                            <div className="p-2 bg-indigo-50 rounded">
+                                                <Building size={16} className="text-indigo-600" />
+                                            </div>
+                                            <div>
+                                                <div className="font-medium text-gray-800">{pg.name}</div>
+                                                <div className="text-xs text-gray-500">{pg.area}, {pg.city}</div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            {searchResults.users.length > 0 && (
+                                <div className="p-3 border-b border-gray-100">
+                                    <div className="text-xs font-semibold text-gray-500 uppercase mb-2">Users ({searchResults.users.length})</div>
+                                    {searchResults.users.map(user => (
+                                        <div
+                                            key={user.id}
+                                            onClick={() => {
+                                                navigate(`/admin/users/${user.id}`);
+                                                setShowResults(false);
+                                                setSearchQuery("");
+                                            }}
+                                            className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded cursor-pointer"
+                                        >
+                                            <div className="p-2 bg-blue-50 rounded">
+                                                <Users size={16} className="text-blue-600" />
+                                            </div>
+                                            <div>
+                                                <div className="font-medium text-gray-800">{user.fullName || user.username}</div>
+                                                <div className="text-xs text-gray-500">{user.email}</div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            {searchResults.owners.length > 0 && (
+                                <div className="p-3">
+                                    <div className="text-xs font-semibold text-gray-500 uppercase mb-2">Owners ({searchResults.owners.length})</div>
+                                    {searchResults.owners.map(owner => (
+                                        <div
+                                            key={owner.id}
+                                            onClick={() => {
+                                                navigate(`/admin/owners/${owner.id}`);
+                                                setShowResults(false);
+                                                setSearchQuery("");
+                                            }}
+                                            className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded cursor-pointer"
+                                        >
+                                            <div className="p-2 bg-purple-50 rounded">
+                                                <UserCheck size={16} className="text-purple-600" />
+                                            </div>
+                                            <div>
+                                                <div className="font-medium text-gray-800">{owner.fullName}</div>
+                                                <div className="text-xs text-gray-500">{owner.email}</div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {showResults && searching && (
+                        <div className="absolute top-full mt-2 w-full bg-white border border-gray-200 rounded-lg shadow-lg p-4 text-center text-gray-500">
+                            Searching...
+                        </div>
+                    )}
+
+                    {showResults && !searching && totalResults === 0 && searchQuery.length > 0 && (
+                        <div className="absolute top-full mt-2 w-full bg-white border border-gray-200 rounded-lg shadow-lg p-4 text-center text-gray-500">
+                            No results found for "{searchQuery}"
+                        </div>
+                    )}
+                </div>
+            </div>
 
             {/* 1. Stats Cards (Clickable) */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

@@ -87,4 +87,15 @@ public class AdminController {
     public ResponseEntity<com.nammapg.backend.payload.response.ReportDataDto> getReportData() {
         return ResponseEntity.ok(adminService.getReportData());
     }
+
+    @GetMapping("/settings")
+    public ResponseEntity<com.nammapg.backend.entity.PlatformSettings> getSettings() {
+        return ResponseEntity.ok(adminService.getSettings());
+    }
+
+    @PutMapping("/settings")
+    public ResponseEntity<com.nammapg.backend.entity.PlatformSettings> updateSettings(
+            @RequestBody com.nammapg.backend.entity.PlatformSettings settings) {
+        return ResponseEntity.ok(adminService.updateSettings(settings));
+    }
 }
